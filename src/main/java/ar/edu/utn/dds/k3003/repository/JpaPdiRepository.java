@@ -1,0 +1,36 @@
+package ar.edu.utn.dds.k3003.repository;
+
+import ar.edu.utn.dds.k3003.model.Etiqueta;
+import ar.edu.utn.dds.k3003.model.EtiquetaXPdi;
+import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+@Profile("!test")
+public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, IPdiRepository {
+
+    @Override
+    default Optional<PiezaDeInformacion> get(int id) {
+        return findById(id);
+    }
+
+    @Query("SELECT p FROM PiezaDeInformacion p WHERE p.hechoId = :hechoId")
+    List<PiezaDeInformacion> listByHechoId(@Param("hechoId") String hechoId);
+
+    @Query("SELECT e.Texto FROM EtiquetaXPdi ep JOIN ep.etiqueta e WHERE ep.pdi.id = :pdiId")
+    List<String> listEtiquetas(@Param("pdiId") int pdiId);
+
+    @Transactional
+    default void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas){};
+}
