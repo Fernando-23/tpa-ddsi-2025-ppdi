@@ -14,7 +14,7 @@ import java.util.Random;
 
 @Repository
 @Profile("test")
-public class InMemoryPdiRepository implements IPdiRepository {
+public class InMemoryPdiRepository implements PdiRepository {
     private int LAST_PDI_ID = 0;
 
     private List<PiezaDeInformacion> piezaDeInformacionList;

@@ -16,7 +16,7 @@ public class PiezaDeInformacionMapper {
     }
 
     public static PdIDTO toDto(PiezaDeInformacion pdi, List<String> etiquetas) {
-        var result = new PdIDTO(
+        return new PdIDTO(
             String.valueOf(pdi.getId()),
             pdi.getHechoId(),
             pdi.getDescripcion(),
@@ -25,6 +25,5 @@ public class PiezaDeInformacionMapper {
             pdi.getContenido(),
             etiquetas
         );
-        return result;
     }
 }

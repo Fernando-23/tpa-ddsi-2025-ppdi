@@ -5,7 +5,7 @@ import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import java.util.List;
 import java.util.Optional;
 
-public interface IPdiRepository {
+public interface PdiRepository {
     PiezaDeInformacion save(PiezaDeInformacion pdi);
     Optional<PiezaDeInformacion> get(int pdiId);
     List<PiezaDeInformacion> listByHechoId(String hechoId);

@@ -1,11 +1,6 @@
 package ar.edu.utn.dds.k3003.repository;
 
-import ar.edu.utn.dds.k3003.model.Etiqueta;
-import ar.edu.utn.dds.k3003.model.EtiquetaXPdi;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @Profile("!test")
-public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, IPdiRepository {
+public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, PdiRepository {
 
     @Override
     default Optional<PiezaDeInformacion> get(int id) {

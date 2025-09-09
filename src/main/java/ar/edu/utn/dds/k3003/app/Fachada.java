@@ -5,7 +5,7 @@ import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.mappers.PiezaDeInformacionMapper;
-import ar.edu.utn.dds.k3003.repository.IPdiRepository;
+import ar.edu.utn.dds.k3003.repository.PdiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,11 @@ import java.util.NoSuchElementException;
 @Service
 public class Fachada implements FachadaProcesadorPdI {
 
-    private IPdiRepository pdiRepository;
+    private PdiRepository pdiRepository;
     private FachadaSolicitudes fachadaSolicitudes;
 
     @Autowired
-    public Fachada(IPdiRepository pdiRepository) {
+    public Fachada(PdiRepository pdiRepository) {
         this.pdiRepository = pdiRepository;
     }
 

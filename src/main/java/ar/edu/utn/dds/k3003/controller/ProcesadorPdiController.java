@@ -57,8 +57,7 @@ public class ProcesadorPdiController {
 
 
     @GetMapping
-    public ResponseEntity<List<PdIDTO>> buscarPorHecho(
-            @RequestParam(required = false) String hecho) {
+    public ResponseEntity<List<PdIDTO>> buscarPorHecho(@RequestParam(required = false) String hecho) {
         List<PdIDTO> resultado = fachadaProcesadorPdI.buscarPorHecho(hecho);
         return ResponseEntity.ok(resultado);
     }

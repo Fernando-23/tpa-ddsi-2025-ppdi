@@ -9,7 +9,7 @@ import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
 import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
-import ar.edu.utn.dds.k3003.repository.IPdiRepository;
+import ar.edu.utn.dds.k3003.repository.PdiRepository;
 import ar.edu.utn.dds.k3003.repository.InMemoryPdiRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 public class FachadaProcesadorPdiTests {
 
     FachadaProcesadorPdI target;
-    IPdiRepository pdiRepository;
+    PdiRepository pdiRepository;
     @Mock
     FachadaSolicitudes fachadaSolicitudes;
 
