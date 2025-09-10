@@ -18,12 +18,12 @@ import java.util.NoSuchElementException;
 public class Fachada implements FachadaProcesadorPdI {
 
     private PdiRepository pdiRepository;
-    @Setter
     private SolicitudesClient solicitudesClient;
 
     @Autowired
-    public Fachada(PdiRepository pdiRepository) {
+    public Fachada(PdiRepository pdiRepository, SolicitudesClient solicitudesClient) {
         this.pdiRepository = pdiRepository;
+        this.solicitudesClient = solicitudesClient;
     }
 
     public Fachada() {

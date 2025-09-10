@@ -1,6 +1,7 @@
 package ar.edu.utn.dds.k3003.app;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,19 +26,20 @@ public class FachadaProcesadorPdiTests {
 
     FachadaProcesadorPdI target;
     PdiRepository pdiRepository;
+
     @Mock
-    FachadaSolicitudes fachadaSolicitudes;
+    SolicitudesClient solicitudesClient;
 
     @BeforeEach
     void setUp() {
         pdiRepository = new InMemoryPdiRepository();
-        target = new Fachada(pdiRepository);
-        target.setFachadaSolicitudes(fachadaSolicitudes);
+        when(solicitudesClient.estaActivo(anyString())).thenReturn(true);
+        target = new Fachada(pdiRepository,solicitudesClient);
     }
 
     @Test
     void testProcesar_ok() {
-        when(fachadaSolicitudes.estaActivo("hechoId")).thenReturn(true);
+        when(solicitudesClient.estaActivo("hechoId")).thenReturn(true);
 
         var input = new PdIDTO("", "hechoId", "descripcion",
                 "", LocalDateTime.now(), "", List.of());
@@ -49,7 +51,7 @@ public class FachadaProcesadorPdiTests {
 
     @Test
     void testProcesar_inactivo() {
-        when(fachadaSolicitudes.estaActivo("hechoId")).thenReturn(false);
+        when(solicitudesClient.estaActivo("hechoId")).thenReturn(false);
 
         var input = new PdIDTO(null, "hechoId", "descripcion",
                 "", LocalDateTime.now(), "", List.of());
@@ -70,7 +72,7 @@ public class FachadaProcesadorPdiTests {
         pdiRepository.save(testPdi);
         pdiRepository.save(testPdi2);
 
-        target = new Fachada(pdiRepository);
+        target = new Fachada(pdiRepository,solicitudesClient);
 
         var result = target.buscarPdIPorId("1");
 
@@ -90,7 +92,7 @@ public class FachadaProcesadorPdiTests {
         pdiRepository.save(testPdi);
         pdiRepository.save(testPdi2);
 
-        target = new Fachada(pdiRepository);
+        target = new Fachada(pdiRepository,solicitudesClient);
 
         var exceptionResult = assertThrows(NoSuchElementException.class,
                 () -> target.buscarPdIPorId("10"));
@@ -111,7 +113,7 @@ public class FachadaProcesadorPdiTests {
         pdiRepository.save(testPdi2);
         pdiRepository.save(testPdi3);
 
-        target = new Fachada(pdiRepository);
+        target = new Fachada(pdiRepository,solicitudesClient);
 
         var result = target.buscarPorHecho("hechoId");
 
@@ -142,7 +144,7 @@ public class FachadaProcesadorPdiTests {
         pdiRepository.save(testPdi2);
         pdiRepository.save(testPdi3);
 
-        target = new Fachada(pdiRepository);
+        target = new Fachada(pdiRepository,solicitudesClient);
         var exceptionResult = assertThrows(NoSuchElementException.class,
                 () -> target.buscarPorHecho(hechoId));
 
