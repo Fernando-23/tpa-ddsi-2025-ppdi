@@ -1,5 +1,6 @@
 package ar.edu.utn.dds.k3003.controller;
 
+import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api/pdis")
 public class ProcesadorPdiController {
-    private final FachadaProcesadorPdI fachadaProcesadorPdI;
+    private final Fachada fachadaProcesadorPdI;
 
     // metricas
     private final Counter pdis_procesados;
@@ -22,7 +23,7 @@ public class ProcesadorPdiController {
     private final Counter pdis_consultados_error;
 
     @Autowired
-    public ProcesadorPdiController(FachadaProcesadorPdI fachadaProcesadorPdI,MeterRegistry registry) {
+    public ProcesadorPdiController(Fachada fachadaProcesadorPdI,MeterRegistry registry) {
         this.fachadaProcesadorPdI = fachadaProcesadorPdI;
         // Definimos los contadores
         this.pdis_procesados = Counter.builder("pdis.procesados")
@@ -62,5 +63,11 @@ public class ProcesadorPdiController {
     public ResponseEntity<PdIDTO> procesarPdi(@RequestBody PdIDTO pdi) {
         pdis_procesados.increment();
         return ResponseEntity.ok(fachadaProcesadorPdI.procesar(pdi));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> limpiarRepoEndpoint(){
+        fachadaProcesadorPdI.limpiarRepo();
+        return ResponseEntity.noContent().build();
     }
 }

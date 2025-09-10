@@ -110,6 +110,7 @@ public class Fachada implements FachadaProcesadorPdI {
     public void setFachadaSolicitudes(FachadaSolicitudes fachadaSolicitudes) {
     }
 
+    @Transactional
     public void limpiarRepo(){
         pdiRepository.deleteAll();
     }
