@@ -25,7 +25,7 @@ public class SolicitudesClient {
         }
 
         try {
-            String url = baseUrl + "/solicitudes/estado?hecho=" + hechoId;
+            String url = baseUrl + "/api/solicitudes/estado?hecho=" + hechoId;
             ResponseEntity<Boolean> response = restTemplate.getForEntity(url,Boolean.class);
             return Boolean.TRUE.equals(response.getBody());
         } catch (Exception e) {
