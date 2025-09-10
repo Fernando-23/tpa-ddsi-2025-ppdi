@@ -106,6 +106,9 @@ public class Fachada implements FachadaProcesadorPdI {
         return result;
     }
 
+//    public List<PdIDTO> listarPdIsExistentes(){
+//    }
+
     @Override
     public void setFachadaSolicitudes(FachadaSolicitudes fachadaSolicitudes) {
     }
@@ -113,5 +116,6 @@ public class Fachada implements FachadaProcesadorPdI {
     @Transactional
     public void limpiarRepo(){
         pdiRepository.deleteAll();
+        // pdiRepository.resetAutoIncrement();
     }
 }

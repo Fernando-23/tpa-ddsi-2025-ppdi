@@ -1,14 +1,12 @@
 package ar.edu.utn.dds.k3003.controller;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
-import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Objects;
 

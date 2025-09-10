@@ -4,6 +4,7 @@ import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,8 @@ public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Inte
 
     @Transactional
     default void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas){};
+
+    //@Modifying
+    //@Query(value = "ALTER TABLE pieza_de_informacion AUTO_INCREMENT = 1", nativeQuery = true)
+    //void resetAutoIncrement();
 }
