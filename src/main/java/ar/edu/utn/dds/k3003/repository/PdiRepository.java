@@ -11,4 +11,5 @@ public interface PdiRepository {
     List<PiezaDeInformacion> listByHechoId(String hechoId);
     List<String> listEtiquetas(int pdiId);
     void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas);
+    void deleteAll();
 }

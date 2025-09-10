@@ -93,4 +93,11 @@ public class InMemoryPdiRepository implements PdiRepository {
             .map(tag -> new EtiquetaXPdi(tag, pdi))
             .toList());
     }
+
+    @Override
+    public void deleteAll(){
+        etiquetaList.clear();
+        etiquetaXPdiList.clear();
+        piezaDeInformacionList.clear();
+    }
 }

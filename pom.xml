@@ -87,12 +87,21 @@
       <version>0.0.7</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-datadog</artifactId>
+    </dependency>
 
     <!-- Spring Boot Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
 
   </dependencies>

@@ -18,7 +18,8 @@ public class PiezaDeInformacion {
     private String hechoId;
     private String descripcion;
     private String lugar;
-    
+
+
     private LocalDateTime momento;
     
     private String contenido;

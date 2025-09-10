@@ -6,8 +6,10 @@ import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.mappers.PiezaDeInformacionMapper;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,7 +18,8 @@ import java.util.NoSuchElementException;
 public class Fachada implements FachadaProcesadorPdI {
 
     private PdiRepository pdiRepository;
-    private FachadaSolicitudes fachadaSolicitudes;
+    @Setter
+    private SolicitudesClient solicitudesClient;
 
     @Autowired
     public Fachada(PdiRepository pdiRepository) {
@@ -27,11 +30,8 @@ public class Fachada implements FachadaProcesadorPdI {
         this.pdiRepository = new ar.edu.utn.dds.k3003.repository.InMemoryPdiRepository();
     }
 
-    @Override
-    public void setFachadaSolicitudes(FachadaSolicitudes fachadaSolicitudes) {
-        this.fachadaSolicitudes = fachadaSolicitudes;
-    }
 
+    @Transactional
     @Override
     public PdIDTO procesar(PdIDTO pdiDto) throws IllegalStateException {
         if(pdiDto==null)
@@ -39,7 +39,7 @@ public class Fachada implements FachadaProcesadorPdI {
         if(pdiDto.hechoId()==null)
             throw new IllegalArgumentException("El hechoId no puede ser nulo");
 
-        if(!fachadaSolicitudes.estaActivo(pdiDto.hechoId()))
+        if(!solicitudesClient.estaActivo(pdiDto.hechoId()))
             throw new IllegalStateException("El hecho no esta activo");
 
         PiezaDeInformacion pdi = null;
@@ -76,6 +76,7 @@ public class Fachada implements FachadaProcesadorPdI {
         return PiezaDeInformacionMapper.toDto(pdi, etiquetasRequest);
     }
 
+    @Transactional
     @Override
     public PdIDTO buscarPdIPorId(String pdiId) throws NoSuchElementException {
         int pdiIdInt = Integer.parseInt(pdiId);
@@ -88,6 +89,7 @@ public class Fachada implements FachadaProcesadorPdI {
         return PiezaDeInformacionMapper.toDto(pdiDb.get(), etiquetas);
     }
 
+    @Transactional
     @Override
     public List<PdIDTO> buscarPorHecho(String hechoId) throws NoSuchElementException {
         var pdis = pdiRepository.listByHechoId(hechoId);
@@ -102,5 +104,13 @@ public class Fachada implements FachadaProcesadorPdI {
         }
 
         return result;
+    }
+
+    @Override
+    public void setFachadaSolicitudes(FachadaSolicitudes fachadaSolicitudes) {
+    }
+
+    public void limpiarRepo(){
+        pdiRepository.deleteAll();
     }
 }

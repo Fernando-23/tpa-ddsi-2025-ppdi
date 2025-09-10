@@ -1,57 +1,42 @@
 package ar.edu.utn.dds.k3003.controller;
 
-import ar.edu.utn.dds.k3003.facades.FachadaFuente;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
-import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
-import ar.edu.utn.dds.k3003.facades.dtos.EstadoSolicitudBorradoEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
-import ar.edu.utn.dds.k3003.facades.dtos.SolicitudDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/pdis")
 public class ProcesadorPdiController {
     private final FachadaProcesadorPdI fachadaProcesadorPdI;
 
+    // metricas
+    private final Counter pdis_procesados;
+    private final Counter pdis_consultados;
+    private final Counter pdis_consultados_error;
+
     @Autowired
-    public ProcesadorPdiController(FachadaProcesadorPdI fachadaProcesadorPdI) {
+    public ProcesadorPdiController(FachadaProcesadorPdI fachadaProcesadorPdI,MeterRegistry registry) {
         this.fachadaProcesadorPdI = fachadaProcesadorPdI;
-        fachadaProcesadorPdI.setFachadaSolicitudes(new FachadaSolicitudes() {
-            @Override
-            public SolicitudDTO agregar(SolicitudDTO solicitudDTO) {
-                return null;
-            }
+        // Definimos los contadores
+        this.pdis_procesados = Counter.builder("pdis.procesados")
+                .description("Número de piezas de información procesados")
+                .register(registry);
 
-            @Override
-            public SolicitudDTO modificar(String solicitudId, EstadoSolicitudBorradoEnum esta, String descripcion) throws NoSuchElementException {
-                return null;
-            }
+        this.pdis_consultados = Counter.builder("pdis.consultadas")
+                .description("Número de piezas de información consultadas")
+                .register(registry);
 
-            @Override
-            public List<SolicitudDTO> buscarSolicitudXHecho(String hechoId) {
-                return List.of();
-            }
+        this.pdis_consultados_error = Counter.builder("pdis.consultadas.nulas")
+                .description("Número de badRequest por piezas de información consultadas nulas")
+                .register(registry);
 
-            @Override
-            public SolicitudDTO buscarSolicitudXId(String solicitudId) {
-                return null;
-            }
-
-            @Override
-            public boolean estaActivo(String unHechoId) {
-                return unHechoId.equals("hecho1") || unHechoId.equals("hecho2");
-            }
-
-            @Override
-            public void setFachadaFuente(FachadaFuente fuente) {
-
-            }
-        });
     }
 
 
@@ -64,11 +49,18 @@ public class ProcesadorPdiController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PdIDTO> buscarPdIPorId(@PathVariable String id) {
+        if (Objects.equals(id, "")){
+            pdis_consultados_error.increment();
+            return ResponseEntity.badRequest().build();
+        }
+
+        pdis_consultados.increment();
         return ResponseEntity.ok(fachadaProcesadorPdI.buscarPdIPorId(id));
     }
 
     @PostMapping
     public ResponseEntity<PdIDTO> procesarPdi(@RequestBody PdIDTO pdi) {
+        pdis_procesados.increment();
         return ResponseEntity.ok(fachadaProcesadorPdI.procesar(pdi));
     }
 }
