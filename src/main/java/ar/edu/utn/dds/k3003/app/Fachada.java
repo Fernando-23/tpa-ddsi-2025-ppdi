@@ -3,6 +3,7 @@ package ar.edu.utn.dds.k3003.app;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
 import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
+import ar.edu.utn.dds.k3003.model.Etiqueta;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.mappers.PiezaDeInformacionMapper;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 public class Fachada implements FachadaProcesadorPdI {
@@ -106,16 +108,34 @@ public class Fachada implements FachadaProcesadorPdI {
         return result;
     }
 
-//    public List<PdIDTO> listarPdIsExistentes(){
-//    }
-
     @Override
     public void setFachadaSolicitudes(FachadaSolicitudes fachadaSolicitudes) {
     }
 
+    //func auxs para mi
     @Transactional
     public void limpiarRepo(){
         pdiRepository.deleteAll();
         // pdiRepository.resetAutoIncrement();
     }
+
+    @Transactional(readOnly = true)
+    public List<PdIDTO> listarPdIsExistentes() {
+        var pdis = pdiRepository.findAllWithEtiquetas();
+
+        return pdis.stream()
+                .map(pdi -> {
+                    List<String> etiquetas =
+                            pdi.getEtiquetas() == null ? List.of() :
+                                    pdi.getEtiquetas().stream()
+                                            .filter(Objects::nonNull)
+                                            .map(ep -> ep.getEtiqueta())
+                                            .filter(Objects::nonNull)
+                                            .map(Etiqueta::getTexto) //
+                                            .toList();
+                    return PiezaDeInformacionMapper.toDto(pdi, etiquetas);
+                })
+                .toList();
+    }
+
 }

@@ -30,6 +30,8 @@ public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Inte
     @Transactional
     default void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas){};
 
+    @Query("SELECT DISTINCT p FROM PiezaDeInformacion p LEFT JOIN FETCH p.etiquetas ep LEFT JOIN FETCH ep.etiqueta")
+    List<PiezaDeInformacion> findAllWithEtiquetas();
     //@Modifying
     //@Query(value = "ALTER TABLE pieza_de_informacion AUTO_INCREMENT = 1", nativeQuery = true)
     //void resetAutoIncrement();

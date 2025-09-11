@@ -100,4 +100,10 @@ public class InMemoryPdiRepository implements PdiRepository {
         etiquetaXPdiList.clear();
         piezaDeInformacionList.clear();
     }
+
+    @Override
+    public List<PiezaDeInformacion> findAll(){
+        return piezaDeInformacionList;
+    }
+
 }

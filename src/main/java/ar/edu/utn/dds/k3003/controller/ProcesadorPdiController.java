@@ -39,19 +39,20 @@ public class ProcesadorPdiController {
     }
 
 
-
     @GetMapping
     public ResponseEntity<List<PdIDTO>> buscarPorHecho(@RequestParam(required = false) String hecho) {
-        List<PdIDTO> resultado = fachadaProcesadorPdI.buscarPorHecho(hecho);
-        return ResponseEntity.ok(resultado);
+        //caso GET /api/pdis?hecho={id}
+        if (hecho!=null){
+            List<PdIDTO> resultado = fachadaProcesadorPdI.buscarPorHecho(hecho);
+            return ResponseEntity.ok(resultado);
+        }
+        var todos = fachadaProcesadorPdI.listarPdIsExistentes();
+        return ResponseEntity.ok(todos);
+
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PdIDTO> buscarPdIPorId(@PathVariable String id) {
-        if (Objects.equals(id, "")){
-            pdis_consultados_error.increment();
-            return ResponseEntity.badRequest().build();
-        }
 
         pdis_consultados.increment();
         return ResponseEntity.ok(fachadaProcesadorPdI.buscarPdIPorId(id));

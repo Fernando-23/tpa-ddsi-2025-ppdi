@@ -12,4 +12,8 @@ public interface PdiRepository {
     List<String> listEtiquetas(int pdiId);
     void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas);
     void deleteAll();
+    List<PiezaDeInformacion> findAll();
+    default List<PiezaDeInformacion> findAllWithEtiquetas() {
+        return findAll();
+    }
 }
