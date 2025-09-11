@@ -1,5 +1,7 @@
 package ar.edu.utn.dds.k3003.repository;
 
+import ar.edu.utn.dds.k3003.model.Etiqueta;
+import ar.edu.utn.dds.k3003.model.EtiquetaXPdi;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
@@ -14,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 @Profile("!test")
-public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, PdiRepository {
+public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, PdiRepository, JpaPdiRepositoryCustom {
 
     @Override
     default Optional<PiezaDeInformacion> get(int id) {
@@ -26,9 +28,6 @@ public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Inte
 
     @Query("SELECT e.Texto FROM EtiquetaXPdi ep JOIN ep.etiqueta e WHERE ep.pdi.id = :pdiId")
     List<String> listEtiquetas(@Param("pdiId") int pdiId);
-
-    @Transactional
-    default void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas){};
 
     @Query("SELECT DISTINCT p FROM PiezaDeInformacion p LEFT JOIN FETCH p.etiquetas ep LEFT JOIN FETCH ep.etiqueta")
     List<PiezaDeInformacion> findAllWithEtiquetas();
