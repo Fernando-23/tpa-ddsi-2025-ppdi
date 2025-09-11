@@ -18,7 +18,6 @@ public class ProcesadorPdiController {
     // metricas
     private final Counter pdis_procesados;
     private final Counter pdis_consultados;
-    private final Counter pdis_consultados_error;
 
     @Autowired
     public ProcesadorPdiController(Fachada fachadaProcesadorPdI,MeterRegistry registry) {
@@ -32,10 +31,6 @@ public class ProcesadorPdiController {
                 .description("Número de piezas de información consultadas")
                 .register(registry);
 
-        this.pdis_consultados_error = Counter.builder("pdis.consultadas.nulas")
-                .description("Número de badRequest por piezas de información consultadas nulas")
-                .register(registry);
-
     }
 
 
@@ -44,8 +39,10 @@ public class ProcesadorPdiController {
         //caso GET /api/pdis?hecho={id}
         if (hecho!=null){
             List<PdIDTO> resultado = fachadaProcesadorPdI.buscarPorHecho(hecho);
+            pdis_consultados.increment();
             return ResponseEntity.ok(resultado);
         }
+        pdis_consultados.increment();
         var todos = fachadaProcesadorPdI.listarPdIsExistentes();
         return ResponseEntity.ok(todos);
 
