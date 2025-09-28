@@ -18,7 +18,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        PiezaDeInformacion pdi1_asociado_hecho01 = new PiezaDeInformacion(
+         PiezaDeInformacion pdi1_asociado_hecho01 = new PiezaDeInformacion(
                 "Hecho01",
                 "Incendio en Sede Medrano",
                 "CABA",
@@ -46,5 +46,7 @@ public class DataLoader implements CommandLineRunner {
         pdiRepository.save(pdi2_asociado_hecho01);
         pdiRepository.save(pdi3_asociado_hecho02);
         System.out.println("Datos de prueba cargados exitosamente");
+
+         
     }
 }

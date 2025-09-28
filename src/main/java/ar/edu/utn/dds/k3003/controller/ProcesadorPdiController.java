@@ -2,67 +2,70 @@ package ar.edu.utn.dds.k3003.controller;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/pdis")
 public class ProcesadorPdiController {
     private final Fachada fachadaProcesadorPdI;
 
-    // metricas
-    private final Counter pdis_procesados;
-    private final Counter pdis_consultados;
+    private final Counter pdisProcesados;
+    private final Counter pdisConsultados;
 
     @Autowired
-    public ProcesadorPdiController(Fachada fachadaProcesadorPdI,MeterRegistry registry) {
+    public ProcesadorPdiController(Fachada fachadaProcesadorPdI, MeterRegistry registry) {
         this.fachadaProcesadorPdI = fachadaProcesadorPdI;
-        // Definimos los contadores
-        this.pdis_procesados = Counter.builder("pdis.procesados")
-                .description("Número de piezas de información procesados")
+        this.pdisProcesados = Counter.builder("pdis.procesados")
+                .description("Numero de piezas de informacion procesados")
                 .register(registry);
 
-        this.pdis_consultados = Counter.builder("pdis.consultadas")
-                .description("Número de piezas de información consultadas")
+        this.pdisConsultados = Counter.builder("pdis.consultadas")
+                .description("Numero de piezas de informacion consultadas")
                 .register(registry);
-
     }
-
 
     @GetMapping
     public ResponseEntity<List<PdIDTO>> buscarPorHecho(@RequestParam(required = false) String hecho) {
-        //caso GET /api/pdis?hecho={id}
-        if (hecho!=null){
-            List<PdIDTO> resultado = fachadaProcesadorPdI.buscarPorHecho(hecho);
-            pdis_consultados.increment();
-            return ResponseEntity.ok(resultado);
+        pdisConsultados.increment();
+        if (!StringUtils.hasText(hecho)) {
+            return ResponseEntity.ok(fachadaProcesadorPdI.listarPdIsExistentes());
         }
-        pdis_consultados.increment();
-        var todos = fachadaProcesadorPdI.listarPdIsExistentes();
-        return ResponseEntity.ok(todos);
 
+        var resultado = fachadaProcesadorPdI.buscarPorHecho(hecho.trim());
+        return ResponseEntity.ok(resultado);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PdIDTO> buscarPdIPorId(@PathVariable String id) {
-
-        pdis_consultados.increment();
-        return ResponseEntity.ok(fachadaProcesadorPdI.buscarPdIPorId(id));
+        pdisConsultados.increment();
+        var pdi = fachadaProcesadorPdI.buscarPdIPorId(id);
+        return ResponseEntity.ok(pdi);
     }
 
     @PostMapping
-    public ResponseEntity<PdIDTO> procesarPdi(@RequestBody PdIDTO pdi) {
-        pdis_procesados.increment();
-        return ResponseEntity.ok(fachadaProcesadorPdI.procesar(pdi));
+    public ResponseEntity<PdIDTO> procesarPdi(@RequestBody(required = false) PdIDTO pdi) {
+        if (pdi == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no puede ser nulo");
+        }
+
+        pdisProcesados.increment();
+        var procesado = fachadaProcesadorPdI.procesar(pdi);
+        var esNuevo = !StringUtils.hasText(pdi.id());
+        var status = esNuevo ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(procesado);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> limpiarRepoEndpoint(){
+    public ResponseEntity<Void> limpiarRepoEndpoint() {
         fachadaProcesadorPdI.limpiarRepo();
         return ResponseEntity.noContent().build();
     }
