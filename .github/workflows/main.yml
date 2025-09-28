@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: crdds.azurecr.io
-  IMAGE_NAME: solicitudes
+  IMAGE_NAME: ppdi
 
 jobs:
   build-and-push:
