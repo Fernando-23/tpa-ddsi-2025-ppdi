@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003.app;
+package ar.edu.utn.dds.k3003.clients;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +37,6 @@ public class SolicitudesClient {
     private boolean mockEstaActivo(String hechoId) {
         return true;
     }
+
 
 }

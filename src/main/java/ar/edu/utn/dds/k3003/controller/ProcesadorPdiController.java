@@ -1,7 +1,7 @@
 package ar.edu.utn.dds.k3003.controller;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
-import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
+import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class ProcesadorPdiController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PdIDTO>> buscarPorHecho(@RequestParam(required = false) String hecho) {
+    public ResponseEntity<List<PiezaDeInformacionDTO>> buscarPorHecho(@RequestParam(required = false) String hecho) {
         pdisConsultados.increment();
         if (!StringUtils.hasText(hecho)) {
             return ResponseEntity.ok(fachadaProcesadorPdI.listarPdIsExistentes());
@@ -45,22 +45,22 @@ public class ProcesadorPdiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PdIDTO> buscarPdIPorId(@PathVariable String id) {
+    public ResponseEntity<PiezaDeInformacionDTO> buscarPdIPorId(@PathVariable String id) {
         pdisConsultados.increment();
         var pdi = fachadaProcesadorPdI.buscarPdIPorId(id);
         return ResponseEntity.ok(pdi);
     }
 
     @PostMapping
-    public ResponseEntity<PdIDTO> procesarPdi(@RequestBody(required = false) PdIDTO pdi) {
+    public ResponseEntity<PiezaDeInformacionDTO> procesarPdi(@RequestBody(required = false) PiezaDeInformacionDTO pdi) {
         if (pdi == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no puede ser nulo");
         }
-
         pdisProcesados.increment();
         var procesado = fachadaProcesadorPdI.procesar(pdi);
-        var esNuevo = !StringUtils.hasText(pdi.id());
-        var status = esNuevo ? HttpStatus.CREATED : HttpStatus.OK;
+        /*boolean esNuevo = !StringUtils.hasText(pdi.id()); Esto podria crear un struct para si es nuevo o procesado
+        var status = esNuevo ? HttpStatus.CREATED : HttpStatus.OK;*/
+        var status =HttpStatus.OK;
         return ResponseEntity.status(status).body(procesado);
     }
 

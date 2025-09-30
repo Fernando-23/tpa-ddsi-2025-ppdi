@@ -3,12 +3,12 @@ package ar.edu.utn.dds.k3003.config;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
     private Map<String, Object> body(String error, String message) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("error", error);
-        payload.put("message", message);
+        payload.put("message", (message == null || message.isBlank()) ? "Ocurrió un error" : message);
         payload.put("timestamp", OffsetDateTime.now());
         return payload;
     }
@@ -51,35 +51,27 @@ public class GlobalExceptionHandler {
     })
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception e) {
         String message;
+
         if (e instanceof MethodArgumentNotValidException manve) {
             message = manve.getBindingResult().getFieldErrors().stream()
-                    .map(error -> error.getField() + ": " + (error.getDefaultMessage() == null ? "valor invalido" : error.getDefaultMessage()))
+                    .map(error -> error.getField() + ": " +
+                            (error.getDefaultMessage() == null ? "valor inválido" : error.getDefaultMessage()))
                     .collect(Collectors.joining("; "));
-            if (message.isBlank()) {
-                message = "Solicitud invalida";
-            }
-        } else if (e instanceof ConstraintViolationException constraintViolationException) {
-            message = constraintViolationException.getConstraintViolations().stream()
-                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+        } else if (e instanceof ConstraintViolationException cve) {
+            message = cve.getConstraintViolations().stream()
+                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                     .collect(Collectors.joining("; "));
-            if (message.isBlank()) {
-                message = "Solicitud invalida";
-            }
-        } else if (e instanceof MethodArgumentTypeMismatchException mismatchException) {
-            String requiredType = mismatchException.getRequiredType() != null
-                    ? mismatchException.getRequiredType().getSimpleName()
+        } else if (e instanceof MethodArgumentTypeMismatchException mismatch) {
+            String requiredType = mismatch.getRequiredType() != null
+                    ? mismatch.getRequiredType().getSimpleName()
                     : "tipo esperado";
-            message = "El parametro '" + mismatchException.getName() + "' debe ser de tipo " + requiredType;
+            message = "El parámetro '" + mismatch.getName() + "' debe ser de tipo " + requiredType;
         } else if (e instanceof NumberFormatException) {
-            message = "Formato invalido para un identificador numerico";
+            message = "Formato inválido para un identificador numérico";
         } else if (e instanceof HttpMessageNotReadableException notReadable && notReadable.getCause() != null) {
             message = notReadable.getCause().getMessage();
         } else {
             message = e.getMessage();
-        }
-
-        if (message == null || message.isBlank()) {
-            message = "Solicitud invalida";
         }
 
         log.warn("400 Bad Request: {}", message);
@@ -92,7 +84,8 @@ public class GlobalExceptionHandler {
     // ---------- 404 Not Found ----------
     @ExceptionHandler({NoSuchElementException.class, NoResourceFoundException.class})
     public ResponseEntity<Map<String, Object>> handleNotFound(Exception e) {
-        String message = e.getMessage() == null || e.getMessage().isBlank() ? "Recurso no encontrado" : e.getMessage();
+        String message = (e.getMessage() == null || e.getMessage().isBlank())
+                ? "Recurso no encontrado" : e.getMessage();
         log.info("404 Not Found: {}", message);
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -113,7 +106,8 @@ public class GlobalExceptionHandler {
     // ---------- 409 Conflict ----------
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(IllegalStateException e) {
-        String message = e.getMessage() == null || e.getMessage().isBlank() ? "No se pudo procesar la solicitud" : e.getMessage();
+        String message = (e.getMessage() == null || e.getMessage().isBlank())
+                ? "No se pudo procesar la solicitud" : e.getMessage();
         log.warn("409 Conflict: {}", message);
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -135,8 +129,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException e) {
         HttpStatusCode statusCode = e.getStatusCode();
-        String message = e.getReason() == null || e.getReason().isBlank() ? "Error en la solicitud" : e.getReason();
-        String label = statusCode instanceof HttpStatus httpStatus ? httpStatus.getReasonPhrase() : statusCode.toString();
+        String message = (e.getReason() == null || e.getReason().isBlank())
+                ? "Error en la solicitud" : e.getReason();
+        String label = statusCode instanceof HttpStatus httpStatus
+                ? httpStatus.getReasonPhrase() : statusCode.toString();
         log.warn("{} {}: {}", statusCode.value(), label, message);
         return ResponseEntity
                 .status(statusCode)
@@ -151,6 +147,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(body("Internal Server Error", "Ocurrio un error inesperado"));
+                .body(body("Internal Server Error", "Ocurrió un error inesperado"));
     }
 }

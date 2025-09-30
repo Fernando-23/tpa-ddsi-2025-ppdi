@@ -1,31 +1,33 @@
 package ar.edu.utn.dds.k3003.app;
 
-import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
+import ar.edu.utn.dds.k3003.analizadores.GestorAnalizadores;
+import ar.edu.utn.dds.k3003.clients.SolicitudesClient;
+import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
 import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
-import ar.edu.utn.dds.k3003.facades.dtos.PdIDTO;
-import ar.edu.utn.dds.k3003.model.Etiqueta;
+import ar.edu.utn.dds.k3003.fachadas.FachadaProcesadorPdIPropia;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
-import ar.edu.utn.dds.k3003.model.mappers.PiezaDeInformacionMapper;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
-import lombok.Setter;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
-public class Fachada implements FachadaProcesadorPdI {
+public class Fachada implements FachadaProcesadorPdIPropia {
 
     private PdiRepository pdiRepository;
     private SolicitudesClient solicitudesClient;
+    private GestorAnalizadores gestor_analisis;
+    private final static Logger logger_fachada = org.slf4j.LoggerFactory.getLogger(Fachada.class);
 
     @Autowired
-    public Fachada(PdiRepository pdiRepository, SolicitudesClient solicitudesClient) {
+    public Fachada(PdiRepository pdiRepository, SolicitudesClient solicitudesClient,GestorAnalizadores gestor_analisis) {
         this.pdiRepository = pdiRepository;
         this.solicitudesClient = solicitudesClient;
+        this.gestor_analisis = gestor_analisis;
     }
 
     public Fachada() {
@@ -35,77 +37,92 @@ public class Fachada implements FachadaProcesadorPdI {
 
     @Transactional
     @Override
-    public PdIDTO procesar(PdIDTO pdiDto) throws IllegalStateException {
-        if(pdiDto==null)
+    public PiezaDeInformacionDTO procesar(PiezaDeInformacionDTO pdiDto) throws IllegalStateException {
+        logger_fachada.info("Procesando PDI: " + pdiDto);
+
+        /////////////////////////////////////////chequeos
+        if(pdiDto==null){
+            logger_fachada.error("El PDI es nulo");
             throw new IllegalArgumentException("El PDI no puede ser nulo");
-        if(pdiDto.hechoId()==null)
+        }
+            
+            
+        if(pdiDto.hechoId()==null){
+            logger_fachada.error("El hecho_id es nulo");
             throw new IllegalArgumentException("El hechoId no puede ser nulo");
+        }
+            
 
-        if(!solicitudesClient.estaActivo(pdiDto.hechoId()))
+        if(!solicitudesClient.estaActivo(pdiDto.hechoId())){
+            logger_fachada.error("El hecho {} no esta activo", pdiDto.hechoId());
             throw new IllegalStateException("El hecho no esta activo");
-
-        PiezaDeInformacion pdi = null;
-        if(pdiDto.id() == null || pdiDto.id().isEmpty()){
-            pdi = new PiezaDeInformacion(
-                pdiDto.hechoId(),
-                pdiDto.descripcion(),
-                pdiDto.lugar(),
-                pdiDto.momento(),
-                pdiDto.contenido()
-            );
-            pdiRepository.save(pdi);
-        }
-        else {
-            int pdiId = Integer.parseInt(pdiDto.id());
-            var pdiDb = pdiRepository.get(pdiId);
-            if(pdiDb.isEmpty())
-                throw new NoSuchElementException("El PDI no existe");
-            pdi = pdiDb.get();
         }
 
-        if(pdiDto.etiquetas() == null || pdiDto.etiquetas().isEmpty())
-            return PiezaDeInformacionMapper.toDto(pdi);
+        ///////////////////////////////////////// procesamiento en si del pdi
+        PiezaDeInformacion pdi_mapeado = dtoAPiezaDeInfo(pdiDto);
+         
+        // consulto si ya existe la pieza de info
+        Optional<PiezaDeInformacion> pdi_procesado = 
+            pdiRepository.listByHechoId(pdi_mapeado.getHechoId()).stream()
+                .filter(pdi -> pdi.getHechoId().equals(pdi_mapeado.getHechoId()) &&
+                             pdi.getDescripcion().equals(pdi_mapeado.getDescripcion()) &&
+                             pdi.getLugar().equals(pdi_mapeado.getLugar()) &&
+                             pdi.getMomento().equals(pdi_mapeado.getMomento()) &&
+                             pdi.getContenido().equals(pdi_mapeado.getContenido()) &&
+                             pdi.getUrl_imagen().equals(pdi_mapeado.getUrl_imagen())
+                )
+                .findFirst();
 
-        var etiquetasRequest = pdiDto.etiquetas();
-        var etiquetas = pdiRepository.listEtiquetas(pdi.getId());
-        var etiquetasNuevas = etiquetasRequest.stream()
-            .filter(tag -> !etiquetas.contains(tag))
-            .toList();
+        //si existe la devuelvo y listo
+        if(pdi_procesado.isPresent()){
+            PiezaDeInformacion pdi_encontrado = pdi_procesado.get();
+            logger_fachada.info("El PdI ya existe, se devuelve el existente con id: {}", pdi_encontrado.getId());
+            return this.piezaDeInfoAdto(pdi_encontrado);
+        }
 
-        if(!etiquetasNuevas.isEmpty())
-            pdiRepository.addEtiquetas(pdi, etiquetasNuevas);
+        //sino, proceso 
+        if(!solicitudesClient.estaActivo(pdiDto.hechoId())){
+            logger_fachada.warn("El hecho {} no esta activo",pdiDto.hechoId());
+            throw new IllegalStateException("El hecho asociado al PdI no esta activo");
+        }
 
-        return PiezaDeInformacionMapper.toDto(pdi, etiquetasRequest);
+        PiezaDeInformacion pdi = this.dtoAPiezaDeInfo(pdiDto);
+
+        gestor_analisis.realizarAnalisis(pdi);
+        logger_fachada.info("Analisis de imagen hecho.");
+
+        return this.piezaDeInfoAdto(pdi);
     }
 
     @Transactional
     @Override
-    public PdIDTO buscarPdIPorId(String pdiId) throws NoSuchElementException {
+    public PiezaDeInformacionDTO buscarPdIPorId(String pdiId) throws NoSuchElementException {
         int pdiIdInt = Integer.parseInt(pdiId);
         var pdiDb = pdiRepository.get(pdiIdInt);
-        if(pdiDb.isEmpty())
+        if(pdiDb.isEmpty()) {
+            logger_fachada.error("No existe el PdI con el id {}", pdiId);
             throw new NoSuchElementException("No se encontro PDI con Id " + pdiId);
+        }
 
-        var etiquetas = pdiRepository.listEtiquetas(pdiIdInt);
-
-        return PiezaDeInformacionMapper.toDto(pdiDb.get(), etiquetas);
+        return this.piezaDeInfoAdto(pdiDb.get());
     }
 
     @Transactional
     @Override
-    public List<PdIDTO> buscarPorHecho(String hechoId) throws NoSuchElementException {
-        var pdis = pdiRepository.listByHechoId(hechoId);
-        if(pdis.isEmpty())
+    public List<PiezaDeInformacionDTO> buscarPorHecho(String hechoId) throws NoSuchElementException {
+        List<PiezaDeInformacion> pdis = pdiRepository.listByHechoId(hechoId);
+        if(pdis.isEmpty()) {
+            logger_fachada.error("No se encontro un PdI asociado al hecho {}",hechoId);
             throw new NoSuchElementException("No se encontro PDI linkeado al hecho " + hechoId);
-
-        List<PdIDTO> result = new java.util.ArrayList<>(List.of());
-
-        for (var pdi : pdis){
-            var etiquetas = pdiRepository.listEtiquetas(pdi.getId());
-            result.add(PiezaDeInformacionMapper.toDto(pdi, etiquetas));
         }
 
-        return result;
+        List<PiezaDeInformacionDTO> pdis_asociados_a_hecho = new java.util.ArrayList<>(List.of());
+
+        for (PiezaDeInformacion pdi : pdis){
+            pdis_asociados_a_hecho.add(this.piezaDeInfoAdto(pdi));
+        }
+
+        return pdis_asociados_a_hecho;
     }
 
     @Override
@@ -120,22 +137,36 @@ public class Fachada implements FachadaProcesadorPdI {
     }
 
     @Transactional(readOnly = true)
-    public List<PdIDTO> listarPdIsExistentes() {
-        var pdis = pdiRepository.findAllWithEtiquetas();
+    public List<PiezaDeInformacionDTO> listarPdIsExistentes() {
+        List<PiezaDeInformacion> pdis = pdiRepository.findAll();
+        List<PiezaDeInformacionDTO> pdis_a_devolver = new java.util.ArrayList<>(List.of());
 
-        return pdis.stream()
-                .map(pdi -> {
-                    List<String> etiquetas =
-                            pdi.getEtiquetas() == null ? List.of() :
-                                    pdi.getEtiquetas().stream()
-                                            .filter(Objects::nonNull)
-                                            .map(ep -> ep.getEtiqueta())
-                                            .filter(Objects::nonNull)
-                                            .map(Etiqueta::getTexto) //
-                                            .toList();
-                    return PiezaDeInformacionMapper.toDto(pdi, etiquetas);
-                })
-                .toList();
+        for (PiezaDeInformacion pdi: pdis){
+            pdis_a_devolver.add(this.piezaDeInfoAdto(pdi));
+        }
+
+        return pdis_a_devolver;
     }
 
+    private PiezaDeInformacion dtoAPiezaDeInfo(PiezaDeInformacionDTO pdiDTO) {
+        return new PiezaDeInformacion(
+                pdiDTO.hechoId(),
+                pdiDTO.descripcion(),
+                pdiDTO.lugar(),
+                pdiDTO.momento(),
+                pdiDTO.contenido(),
+                pdiDTO.url_imagen()
+        );
+    }
+
+    private PiezaDeInformacionDTO piezaDeInfoAdto(PiezaDeInformacion pdi_posta){
+        return new PiezaDeInformacionDTO(
+            pdi_posta.getId() ,
+            pdi_posta.getHechoId(),
+            pdi_posta.getDescripcion(),
+            pdi_posta.getLugar(),
+            pdi_posta.getMomento(),
+            pdi_posta.getContenido(),
+            pdi_posta.getUrl_imagen());
+    }
 }

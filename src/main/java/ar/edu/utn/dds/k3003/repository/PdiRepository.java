@@ -9,11 +9,6 @@ public interface PdiRepository {
     PiezaDeInformacion save(PiezaDeInformacion pdi);
     Optional<PiezaDeInformacion> get(int pdiId);
     List<PiezaDeInformacion> listByHechoId(String hechoId);
-    List<String> listEtiquetas(int pdiId);
-    void addEtiquetas(PiezaDeInformacion pdi, List<String> etiquetas);
     void deleteAll();
     List<PiezaDeInformacion> findAll();
-    default List<PiezaDeInformacion> findAllWithEtiquetas() {
-        return findAll();
-    }
 }

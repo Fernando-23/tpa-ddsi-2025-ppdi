@@ -23,7 +23,8 @@ public class DataLoader implements CommandLineRunner {
                 "Incendio en Sede Medrano",
                 "CABA",
                 LocalDateTime.of(2025, 9, 9, 15, 30),
-                "mucho humo en Av Medrano y Tucuman"
+                "Mucho humo en Av Medrano y Tucuman"
+                ,"https://www.example.com/imagen1.jpg"
         );
 
         PiezaDeInformacion pdi2_asociado_hecho01 = new PiezaDeInformacion(
@@ -31,7 +32,8 @@ public class DataLoader implements CommandLineRunner {
                 "Incendio en Sede Medrano",
                 "CABA",
                 LocalDateTime.of(2025, 9, 9, 16, 30),
-                "corte de calle en Av Cordoba"
+                "Corte de calle en Av Cordoba"
+                ,"https://www.example.com/imagen2.jpg"
         );
 
         PiezaDeInformacion pdi3_asociado_hecho02 = new PiezaDeInformacion(
@@ -40,6 +42,7 @@ public class DataLoader implements CommandLineRunner {
                 "CABA",
                 LocalDateTime.of(2025, 9, 1, 16, 30),
                 "se corto la loooz"
+                ,"https://www.example.com/imagen3.jpg"
         );
 
         pdiRepository.save(pdi1_asociado_hecho01);

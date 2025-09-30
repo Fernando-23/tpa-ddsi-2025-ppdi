@@ -1,9 +1,8 @@
 package ar.edu.utn.dds.k3003.controller;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
-import ar.edu.utn.dds.k3003.app.SolicitudesClient;
+import ar.edu.utn.dds.k3003.clients.SolicitudesClient;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
-import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
 import ar.edu.utn.dds.k3003.repository.InMemoryPdiRepository;
 import org.springframework.boot.test.context.TestConfiguration;

@@ -1,7 +1,7 @@
 package ar.edu.utn.dds.k3003.repository;
 
-import ar.edu.utn.dds.k3003.model.Etiqueta;
-import ar.edu.utn.dds.k3003.model.EtiquetaXPdi;
+//import ar.edu.utn.dds.k3003.model.Etiqueta;
+//import ar.edu.utn.dds.k3003.model.EtiquetaXPdi;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Profile;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 @Profile("!test")
-public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, PdiRepository, JpaPdiRepositoryCustom {
+public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Integer>, PdiRepository {
 
     @Override
     default Optional<PiezaDeInformacion> get(int id) {
@@ -26,12 +26,4 @@ public interface JpaPdiRepository extends JpaRepository<PiezaDeInformacion, Inte
     @Query("SELECT p FROM PiezaDeInformacion p WHERE p.hechoId = :hechoId")
     List<PiezaDeInformacion> listByHechoId(@Param("hechoId") String hechoId);
 
-    @Query("SELECT e.Texto FROM EtiquetaXPdi ep JOIN ep.etiqueta e WHERE ep.pdi.id = :pdiId")
-    List<String> listEtiquetas(@Param("pdiId") int pdiId);
-
-    @Query("SELECT DISTINCT p FROM PiezaDeInformacion p LEFT JOIN FETCH p.etiquetas ep LEFT JOIN FETCH ep.etiqueta")
-    List<PiezaDeInformacion> findAllWithEtiquetas();
-    //@Modifying
-    //@Query(value = "ALTER TABLE pieza_de_informacion AUTO_INCREMENT = 1", nativeQuery = true)
-    //void resetAutoIncrement();
 }
