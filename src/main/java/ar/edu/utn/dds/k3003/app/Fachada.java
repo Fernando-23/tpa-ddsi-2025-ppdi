@@ -3,14 +3,18 @@ package ar.edu.utn.dds.k3003.app;
 import ar.edu.utn.dds.k3003.analizadores.GestorAnalizadores;
 import ar.edu.utn.dds.k3003.clients.SolicitudesClient;
 import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
+import ar.edu.utn.dds.k3003.dtos.ResultadoAnalisisDTO;
 import ar.edu.utn.dds.k3003.facades.FachadaSolicitudes;
 import ar.edu.utn.dds.k3003.fachadas.FachadaProcesadorPdIPropia;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
+import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -150,6 +154,21 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         return pdis_a_devolver;
     }
 
+    @Transactional
+    public List<ResultadoAnalisisDTO> obtenerResultadosAnalisis(Integer id_pdi){
+        Optional<PiezaDeInformacion> pdi_repo = pdiRepository.get(id_pdi);
+
+        if (pdi_repo.isEmpty()){
+            logger_fachada.error("No existe el PdI con el id {}", id_pdi);
+            throw new NoSuchElementException("No se encontro PDI con Id " + id_pdi);
+        }
+        PiezaDeInformacion pdi = pdi_repo.get();
+
+        return this.resultadosPostaAResultadosDTO(pdi.getRes_analisis());
+    }
+
+
+    //TODO pasar todo lo siguiente a una clase maps o mapper
     private PiezaDeInformacion dtoAPiezaDeInfo(PiezaDeInformacionDTO pdiDTO) {
         return new PiezaDeInformacion(
                 pdiDTO.hechoId(),
@@ -170,5 +189,21 @@ public class Fachada implements FachadaProcesadorPdIPropia {
             pdi_posta.getMomento(),
             pdi_posta.getContenido(),
             pdi_posta.getUrl_imagen());
+    }
+
+    private ResultadoAnalisisDTO resultadoAResultadoIndividualDTO(ResultadoAnalisis resultado){
+        return new ResultadoAnalisisDTO(
+                resultado.getTipo_analizador(),
+                resultado.getEtiquetas_procesadas());
+    }
+
+    private List<ResultadoAnalisisDTO> resultadosPostaAResultadosDTO(List<ResultadoAnalisis> resultados_a_mapear){
+        List<ResultadoAnalisisDTO> resultados_a_devolver = new ArrayList<>();
+        for (ResultadoAnalisis resultado : resultados_a_mapear){
+            var resultado_mapeado = this.resultadoAResultadoIndividualDTO(resultado);
+            resultados_a_devolver.add(resultado_mapeado);
+        }
+
+        return resultados_a_devolver;
     }
 }

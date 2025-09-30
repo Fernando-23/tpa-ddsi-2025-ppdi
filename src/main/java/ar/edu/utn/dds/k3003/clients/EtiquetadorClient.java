@@ -5,6 +5,7 @@ import ar.edu.utn.dds.k3003.dtos.EtiquetaDTO;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,10 +25,11 @@ public class EtiquetadorClient implements Analizador {
     private static final Logger logger_etiquetador = LoggerFactory.getLogger(EtiquetadorClient.class);
     private final RestTemplate rest_template;
     private final String url_base = "https://api.apilayer.com/image_labeling/url";
-    private final String api_key = "apykeyoriginal";
+    private final String api_key;
 
-    public EtiquetadorClient(RestTemplateBuilder builder) {
+    public EtiquetadorClient(RestTemplateBuilder builder,@Value("${etiquetador.api.key}") String api_key) {
         this.rest_template = builder.build();
+        this.api_key=api_key;
     }
 
     @Override

@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 
 
 public record PiezaDeInformacionDTO(Integer id, String hechoId, String descripcion, String lugar, LocalDateTime momento, String contenido, String url_imagen) {
-   public PiezaDeInformacionDTO(Integer id, String hechoId) {
-      this(id, hechoId, null, null, null, null, null);
-   }
 
    public PiezaDeInformacionDTO(Integer id, String hechoId, String descripcion, String lugar, LocalDateTime momento, String contenido, String url_imagen) {
       this.id = id;

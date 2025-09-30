@@ -2,6 +2,8 @@ package ar.edu.utn.dds.k3003.controller;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
+import ar.edu.utn.dds.k3003.dtos.ResultadoAnalisisDTO;
+import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,5 +70,11 @@ public class ProcesadorPdiController {
     public ResponseEntity<Void> limpiarRepoEndpoint() {
         fachadaProcesadorPdI.limpiarRepo();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/resultado_analisis")
+    public ResponseEntity<List<ResultadoAnalisisDTO>> buscarResultadosAnalisisPorIdPdI(@PathVariable("id") Integer id_pdi) {
+        var resultadoAnalisis = fachadaProcesadorPdI.obtenerResultadosAnalisis(id_pdi);
+        return ResponseEntity.ok(resultadoAnalisis);
     }
 }
