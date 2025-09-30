@@ -91,7 +91,9 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         gestor_analisis.realizarAnalisis(pdi);
         logger_fachada.info("Analisis de imagen hecho.");
 
-        return this.piezaDeInfoAdto(pdi);
+        PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
+        logger_fachada.info("Pieza de Informacion {} procesado",pdi_guardado.getId());
+        return this.piezaDeInfoAdto(pdi_guardado);
     }
 
     @Transactional
