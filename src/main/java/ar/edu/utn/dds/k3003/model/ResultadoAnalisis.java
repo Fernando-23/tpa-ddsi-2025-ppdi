@@ -30,4 +30,5 @@ public class ResultadoAnalisis {
         this.etiquetas_procesadas = etiquetas_procesadas;
     }
 
+
 }

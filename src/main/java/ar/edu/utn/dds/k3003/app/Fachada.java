@@ -167,8 +167,23 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         return this.resultadosPostaAResultadosDTO(pdi.getRes_analisis());
     }
 
+    @Transactional
+    public ResultadoAnalisisDTO obtenerResultadosAnalisisPorAnalizador(Integer id_pdi, String analizador){
+        Optional<PiezaDeInformacion> pdi_repo = pdiRepository.get(id_pdi);
+
+        if (pdi_repo.isEmpty()){
+            logger_fachada.error("No existe el PdI con el id {}", id_pdi);
+            throw new NoSuchElementException("No se encontro PDI con Id " + id_pdi);
+        }
+
+        PiezaDeInformacion pdi = pdi_repo.get();
+        ResultadoAnalisis res_de_analizador = pdi.obtenerResultadoPorAnalizador(analizador);
+
+        return this.resultadoAResultadoIndividualDTO(res_de_analizador);
+    }
 
     //TODO pasar todo lo siguiente a una clase maps o mapper
+    //actualizacion, no salio bien, yafue
     private PiezaDeInformacion dtoAPiezaDeInfo(PiezaDeInformacionDTO pdiDTO) {
         return new PiezaDeInformacion(
                 pdiDTO.hechoId(),
@@ -206,4 +221,6 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
         return resultados_a_devolver;
     }
+
+
 }

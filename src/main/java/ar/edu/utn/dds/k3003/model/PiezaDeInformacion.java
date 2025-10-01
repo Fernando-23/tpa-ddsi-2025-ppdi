@@ -30,6 +30,15 @@ public class PiezaDeInformacion {
         res_analisis.add(nuevo_res);
         nuevo_res.setPdi(this);
     }
+
+    public ResultadoAnalisis obtenerResultadoPorAnalizador(String analizador) {
+
+        return res_analisis.stream()
+                .filter(r -> r.getTipo_analizador().equalsIgnoreCase(analizador))
+                .findFirst()
+                .orElse(null);
+    }
+
     public PiezaDeInformacion() { }
 
     public PiezaDeInformacion(String hechoId, String descripcion,
