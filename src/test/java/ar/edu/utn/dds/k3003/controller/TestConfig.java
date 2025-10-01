@@ -1,8 +1,10 @@
 package ar.edu.utn.dds.k3003.controller;
 
+import ar.edu.utn.dds.k3003.analizadores.GestorAnalizadores;
 import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.clients.SolicitudesClient;
 import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
+import ar.edu.utn.dds.k3003.fachadas.FachadaProcesadorPdIPropia;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
 import ar.edu.utn.dds.k3003.repository.InMemoryPdiRepository;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -27,7 +29,7 @@ public class TestConfig {
         return mock;
     }
     @Bean
-    public FachadaProcesadorPdI fachadaProcesadorPdI(PdiRepository repo, SolicitudesClient solicitudesClient) {
-        return new Fachada(repo, solicitudesClient);
+    public FachadaProcesadorPdIPropia fachadaProcesadorPdI(PdiRepository repo, SolicitudesClient solicitudesClient, GestorAnalizadores gestor) {
+        return new Fachada(repo, solicitudesClient,gestor);
     }
 }
