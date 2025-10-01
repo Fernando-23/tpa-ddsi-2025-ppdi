@@ -41,8 +41,8 @@ public class OCRClient implements Analizador {
 
         UriComponentsBuilder uri = UriComponentsBuilder.fromHttpUrl(url_base)
                 .queryParam("apikey", api_key)
-                .queryParam("url", url_imagen)
-                .queryParam("language", "spa");
+                .queryParam("url", url_imagen);
+
 
         try {
             ResponseEntity<OCRDTO> response = rest_template.exchange(

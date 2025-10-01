@@ -34,6 +34,7 @@ public class GestorAnalizadores {
             resultado.setEtiquetas_procesadas("Sin resultados.");
             logger_gestor_analisis.warn("(realizarAnalisis) - El analizador {} no proceso ningun resultado en base a la imagen recibida, se procede a dejar el mensaje -Sin resultados.-"
                     ,resultado.getTipo_analizador());
+            pdi.agregarResultado(resultado);
         }
 
         logger_gestor_analisis.info("(realizarAnalisis) - Analisis completado.");
