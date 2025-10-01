@@ -1,13 +1,14 @@
 package ar.edu.utn.dds.k3003.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter
-@NoArgsConstructor // constructor vacío requerido por JPA
+@Data
+@NoArgsConstructor
 public class ResultadoAnalisis {
 
     @Id
@@ -17,7 +18,8 @@ public class ResultadoAnalisis {
     @Column(nullable = false)
     private String tipo_analizador;
 
-    @Column // opcional, por si las etiquetas son largas
+
+    @Column
     private String etiquetas_procesadas;
 
     @Setter

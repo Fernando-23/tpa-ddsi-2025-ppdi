@@ -26,10 +26,15 @@ public class EtiquetadorClient implements Analizador {
     private final RestTemplate rest_template;
     private final String url_base = "https://api.apilayer.com/image_labeling/url";
     private final String api_key;
-
+    public String que_analizador_soy = "ETIQUETADOR";
     public EtiquetadorClient(RestTemplateBuilder builder,@Value("${etiquetador.api.key}") String api_key) {
         this.rest_template = builder.build();
         this.api_key=api_key;
+    }
+
+    @Override
+    public String getQueAnalizadorSoy(){
+        return que_analizador_soy;
     }
 
     @Override

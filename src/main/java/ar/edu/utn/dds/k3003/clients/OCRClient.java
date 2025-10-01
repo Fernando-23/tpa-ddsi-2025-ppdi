@@ -1,7 +1,7 @@
 package ar.edu.utn.dds.k3003.clients;
 
 import ar.edu.utn.dds.k3003.analizadores.Analizador;
-import ar.edu.utn.dds.k3003.dtos.EtiquetaDTO;
+import ar.edu.utn.dds.k3003.dtos.OCRDTO;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +16,13 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
 public class OCRClient implements Analizador {
-    private static final Logger logger_ocr = LoggerFactory.getLogger(EtiquetadorClient.class);
+    private static final Logger logger_ocr = LoggerFactory.getLogger(OCRClient.class);
     private final RestTemplate rest_template;
     private final String url_base = "https://api.ocr.space/parse/imageurl";
     private final String api_key;
+    public String que_analizador_soy = "OCR";
 
     public OCRClient(RestTemplateBuilder builder, @Value("${ocr.api.key}") String api_key) {
         this.rest_template = builder.build();
@@ -33,48 +30,47 @@ public class OCRClient implements Analizador {
     }
 
     @Override
+    public String getQueAnalizadorSoy(){
+        return que_analizador_soy;
+    }
+
+    @Override
     public ResultadoAnalisis realizarProcesamiento(String url_imagen) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", api_key);
 
-        String uri = UriComponentsBuilder.fromHttpUrl(url_base)
+        UriComponentsBuilder uri = UriComponentsBuilder.fromHttpUrl(url_base)
+                .queryParam("apikey", api_key)
                 .queryParam("url", url_imagen)
-                .toUriString();
+                .queryParam("language", "spa");
 
         try {
-            ResponseEntity<EtiquetaDTO[]> response = rest_template.exchange(
-                    uri,
+            ResponseEntity<OCRDTO> response = rest_template.exchange(
+                    uri.toUriString(),
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
-                    EtiquetaDTO[].class
+                    OCRDTO.class
             );
 
-            EtiquetaDTO[] body = response.getBody();
+            OCRDTO body = response.getBody();
 
-            if (body == null || body.length == 0) {
-                logger_ocr.warn("No se retornaron etiquetas para la URL: {}", url_imagen);
-                return new ResultadoAnalisis("ETIQUETADOR", "[]");
+            if (body == null || body.getParsedResults() == null || body.getParsedResults().isEmpty()) {
+                logger_ocr.warn("No se obtuvo texto del OCR para la URL: {}", url_imagen);
+                return new ResultadoAnalisis("OCR", "[]");
             }
 
-            List<String> etiquetas = Arrays.stream(body)
-                    .map(EtiquetaDTO::getLabel)
-                    .collect(Collectors.toList());
+            String textoExtraido = body.getParsedResults().get(0).getParsedText();
 
-            logger_ocr.debug("Url de imagen procesada. Etiquetas: {}", etiquetas);
+            logger_ocr.debug("Texto extraído de {}: {}", url_imagen, textoExtraido);
 
-            String etiquetas_concatenadas = etiquetas.stream()
-                    .collect(Collectors.joining(", ", "[", "]"));
-
-            return new ResultadoAnalisis("ETIQUETADOR", etiquetas_concatenadas);
+            return new ResultadoAnalisis("OCR", textoExtraido.trim());
 
         } catch (HttpServerErrorException e) {
-            // apilayer devolvió 5xx se hizo el vivo barbaro
-            logger_ocr.warn("Error del servicio Etiquetador para {}: {}", url_imagen, e.getResponseBodyAsString());
-            return new ResultadoAnalisis("ETIQUETADOR","[]");
+            logger_ocr.warn("Error del servicio OCR para {}: {}", url_imagen, e.getResponseBodyAsString());
+            return new ResultadoAnalisis("OCR", "[]");
         } catch (Exception e) {
-
-            logger_ocr.error("Fallo inesperado llamando al Etiquetador API: {}", e.getMessage(), e);
-            return new ResultadoAnalisis("ETIQUETADOR", "[]");
+            logger_ocr.error("Fallo inesperado llamando a OCR API: {}", e.getMessage(), e);
+            return new ResultadoAnalisis("OCR", "[]");
         }
     }
 }

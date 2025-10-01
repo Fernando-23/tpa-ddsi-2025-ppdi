@@ -19,7 +19,7 @@ public class GestorAnalizadores {
     public GestorAnalizadores(List<Analizador> analizadores) {
         this.analizadores = analizadores;
     }
-
+    //TODO ocr le pegamos pero no devuelve nada (no procesa), mirar eso
     public void realizarAnalisis(PiezaDeInformacion pdi){
         for (Analizador analizador : analizadores){
             ResultadoAnalisis resultado = analizador.realizarProcesamiento(pdi.getUrl_imagen());
@@ -30,9 +30,12 @@ public class GestorAnalizadores {
                 pdi.agregarResultado(resultado);
                 continue;
             }
-
-            logger_gestor_analisis.warn("(realizarAnalisis) - El analizador {} no proceso ninguna etiqueta en base a la imagen recibida",resultado.getTipo_analizador());
+            resultado.setTipo_analizador(analizador.getQueAnalizadorSoy());
+            resultado.setEtiquetas_procesadas("Sin resultados.");
+            logger_gestor_analisis.warn("(realizarAnalisis) - El analizador {} no proceso ningun resultado en base a la imagen recibida, se procede a dejar el mensaje -Sin resultados.-"
+                    ,resultado.getTipo_analizador());
         }
+
         logger_gestor_analisis.info("(realizarAnalisis) - Analisis completado.");
     }
 }

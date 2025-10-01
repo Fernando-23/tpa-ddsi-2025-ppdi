@@ -9,6 +9,7 @@ import ar.edu.utn.dds.k3003.fachadas.FachadaProcesadorPdIPropia;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
+import org.junitpioneer.jupiter.resource.New;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,6 +92,15 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         }
 
         PiezaDeInformacion pdi = this.dtoAPiezaDeInfo(pdiDto);
+
+        if (pdi.getUrl_imagen() == null || pdi.getUrl_imagen().isBlank()){
+            logger_fachada.info("Pieza de informacion sin url, se procede a guardar sin procesar.");
+            //TODO agregar un for para todos los analizadores que diga que pdi no tiene imagen
+            pdi.agregarResultado(new ResultadoAnalisis("SIN_IMAGEN", "PdI sin url."));
+            PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
+            logger_fachada.info("Pieza de informacion {} procesado",pdi_guardado.getId());
+            return this.piezaDeInfoAdto(pdi_guardado);
+        }
 
         gestor_analisis.realizarAnalisis(pdi);
         logger_fachada.info("Analisis de imagen hecho.");
@@ -178,8 +188,14 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
         PiezaDeInformacion pdi = pdi_repo.get();
         ResultadoAnalisis res_de_analizador = pdi.obtenerResultadoPorAnalizador(analizador);
+        if (res_de_analizador == null) {
+            logger_fachada.error("No se encontro resultado del analizador pedido.");
+            throw new NoSuchElementException("No se encontro resultado del analizador pedido.");
+        }
 
+        logger_fachada.info("Resultado ligado al analizador pedido encontrado.");
         return this.resultadoAResultadoIndividualDTO(res_de_analizador);
+
     }
 
     //TODO pasar todo lo siguiente a una clase maps o mapper
