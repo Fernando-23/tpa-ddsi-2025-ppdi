@@ -1,6 +1,7 @@
 package ar.edu.utn.dds.k3003.clients;
 
 import ar.edu.utn.dds.k3003.analizadores.Analizador;
+
 import ar.edu.utn.dds.k3003.dtos.OCRDTO;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ public class OCRClient implements Analizador {
     private final RestTemplate rest_template;
     private final String url_base = "https://api.ocr.space/parse/imageurl";
     private final String api_key;
-    public String que_analizador_soy = "OCR";
+    private final String que_analizador_soy = "OCR";
 
     public OCRClient(RestTemplateBuilder builder, @Value("${ocr.api.key}") String api_key) {
         this.rest_template = builder.build();
@@ -59,11 +60,16 @@ public class OCRClient implements Analizador {
                 return new ResultadoAnalisis("OCR", "[]");
             }
 
-            String textoExtraido = body.getParsedResults().get(0).getParsedText();
+            String texto_extraido = body.getParsedResults().get(0).getParsedText();
 
-            logger_ocr.debug("Texto extraído de {}: {}", url_imagen, textoExtraido);
+            if (texto_extraido == null || texto_extraido.isBlank()) {
+                logger_ocr.info("OCR no encontró texto en la imagen: {}", url_imagen);
+                return new ResultadoAnalisis(que_analizador_soy, "[]");
+            }
 
-            return new ResultadoAnalisis("OCR", textoExtraido.trim());
+            logger_ocr.debug("Texto extraído de {}: {}", url_imagen, texto_extraido);
+
+            return new ResultadoAnalisis(que_analizador_soy, texto_extraido.trim());
 
         } catch (HttpServerErrorException e) {
             logger_ocr.warn("Error del servicio OCR para {}: {}", url_imagen, e.getResponseBodyAsString());

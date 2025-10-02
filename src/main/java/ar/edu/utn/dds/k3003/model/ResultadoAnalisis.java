@@ -2,7 +2,6 @@ package ar.edu.utn.dds.k3003.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -18,9 +17,9 @@ public class ResultadoAnalisis {
     @Column(nullable = false)
     private String tipo_analizador;
 
-
+    @Lob
     @Column
-    private String etiquetas_procesadas;
+    private String resultado_procesamiento;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,7 +28,7 @@ public class ResultadoAnalisis {
 
     public ResultadoAnalisis(String tipo_analizador, String etiquetas_procesadas) {
         this.tipo_analizador = tipo_analizador;
-        this.etiquetas_procesadas = etiquetas_procesadas;
+        this.resultado_procesamiento = etiquetas_procesadas;
     }
 
 

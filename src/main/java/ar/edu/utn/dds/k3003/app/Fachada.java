@@ -9,7 +9,7 @@ import ar.edu.utn.dds.k3003.fachadas.FachadaProcesadorPdIPropia;
 import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
-import org.junitpioneer.jupiter.resource.New;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -226,7 +226,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
     private ResultadoAnalisisDTO resultadoAResultadoIndividualDTO(ResultadoAnalisis resultado){
         return new ResultadoAnalisisDTO(
                 resultado.getTipo_analizador(),
-                resultado.getEtiquetas_procesadas());
+                resultado.getResultado_procesamiento());
     }
 
     private List<ResultadoAnalisisDTO> resultadosPostaAResultadosDTO(List<ResultadoAnalisis> resultados_a_mapear){

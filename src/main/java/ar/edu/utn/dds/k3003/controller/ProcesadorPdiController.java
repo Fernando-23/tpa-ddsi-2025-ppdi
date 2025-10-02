@@ -82,6 +82,7 @@ public class ProcesadorPdiController {
     public ResponseEntity<ResultadoAnalisisDTO> buscarResultadosAnalisisDeUnAnalizadorPorIdPdI(
             @PathVariable("id") Integer id_pdi,@PathVariable("analizador") String analizador){
         var resultadoAnalisis = fachadaProcesadorPdI.obtenerResultadosAnalisisPorAnalizador(id_pdi,analizador);
+
         return  ResponseEntity.ok(resultadoAnalisis);
     }
 }

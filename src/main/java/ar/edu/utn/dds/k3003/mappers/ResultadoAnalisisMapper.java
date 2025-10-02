@@ -11,7 +11,7 @@ public class ResultadoAnalisisMapper implements Mapper<ResultadoAnalisis, Result
     public ResultadoAnalisisDTO elementoPostaADTO(ResultadoAnalisis resultado){
         return new ResultadoAnalisisDTO(
                 resultado.getTipo_analizador(),
-                resultado.getEtiquetas_procesadas());
+                resultado.getResultado_procesamiento());
     }
 
     //de momeeento no lo uso (y no tendria sentido que lo use)

@@ -24,14 +24,14 @@ public class GestorAnalizadores {
         for (Analizador analizador : analizadores){
             ResultadoAnalisis resultado = analizador.realizarProcesamiento(pdi.getUrl_imagen());
 
-            if (!resultado.getEtiquetas_procesadas().equals("[]")){
+            if (!resultado.getResultado_procesamiento().equals("[]")){
                 logger_gestor_analisis.
                         info("(realizarAnalisis) - Resultado valido obtenido, agregando resultado de analizador {} a la pieza de info.",resultado.getTipo_analizador());
                 pdi.agregarResultado(resultado);
                 continue;
             }
             resultado.setTipo_analizador(analizador.getQueAnalizadorSoy());
-            resultado.setEtiquetas_procesadas("Sin resultados.");
+            resultado.setResultado_procesamiento("Sin resultados.");
             logger_gestor_analisis.warn("(realizarAnalisis) - El analizador {} no proceso ningun resultado en base a la imagen recibida, se procede a dejar el mensaje -Sin resultados.-"
                     ,resultado.getTipo_analizador());
             pdi.agregarResultado(resultado);
