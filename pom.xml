@@ -48,6 +48,11 @@
       <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
+    <!-- CloudAMQP -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
 
     <!-- Database -->
     <dependency>
