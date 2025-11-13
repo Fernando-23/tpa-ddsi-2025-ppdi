@@ -28,6 +28,7 @@ public class PdiWorker {
         try {
             fachada.procesar(dto);
             log.info("PDI (extId={}) procesado OK", externalId);
+            //avisarle a fuentes
         } catch (Exception e) {
             log.error("PDI (extId={}) falló", externalId, e);
             throw e;
