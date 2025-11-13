@@ -12,14 +12,25 @@ RUN mvn -q -U -DskipTests \
     dependency:go-offline || true
 
 # Código
-COPY src ./src
-# Jar con nombre fijo para simplificar el COPY
-RUN mvn -q clean package -DskipTests -Dproject.build.finalName=app \
+COPY . .
+
+# Empaquetar (single o multi-módulo)
+RUN mvn -q clean package -DskipTests \
     -Dmaven.wagon.http.retryHandler.count=5 \
     -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
 
+# Copiar el primer JAR "runnable" que encuentre en cualquier target/
+# (excluye sources/javadoc/tests)
+RUN set -eux; \
+    JAR="$(find . -type f -path '*/target/*.jar' \
+      ! -name '*-sources.jar' \
+      ! -name '*-javadoc.jar' \
+      ! -name '*-tests.jar' \
+      | head -n1)"; \
+    echo "Usando JAR: $JAR"; \
+    cp "$JAR" /app/app.jar
+
 ########## Stage 2: runtime ##########
-# JRE (más liviano que JDK) y tag válido
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
@@ -27,13 +38,12 @@ WORKDIR /app
 RUN addgroup --system spring && adduser --system --ingroup spring spring
 USER spring:spring
 
-COPY --from=build /app/target/app.jar /app/app.jar
+# Traer el jar preparado en la etapa de build
+COPY --from=build /app/app.jar /app/app.jar
 
 # Vars de entorno
 ENV SERVER_PORT=8080
 ENV JAVA_OPTS=""
 
 EXPOSE 8080
-
-# En exec-form no se expanden env vars; usamos sh -c
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
