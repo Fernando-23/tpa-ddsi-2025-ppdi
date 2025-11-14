@@ -213,14 +213,25 @@ public class Fachada implements FachadaProcesadorPdIPropia {
     }
 
     private PiezaDeInformacionDTO piezaDeInfoAdto(PiezaDeInformacion pdi_posta){
+
+        List<ResultadoAnalisisDTO> resultadosDto = pdi_posta.getRes_analisis()
+                .stream()
+                .map(r -> new ResultadoAnalisisDTO(
+                        r.getTipo_analizador(),
+                        r.getResultado_procesamiento()
+                ))
+                .toList();
+
         return new PiezaDeInformacionDTO(
-            pdi_posta.getId() ,
-            pdi_posta.getHechoId(),
-            pdi_posta.getDescripcion(),
-            pdi_posta.getLugar(),
-            pdi_posta.getMomento(),
-            pdi_posta.getContenido(),
-            pdi_posta.getUrl_imagen());
+                pdi_posta.getId(),
+                pdi_posta.getHechoId(),
+                pdi_posta.getDescripcion(),
+                pdi_posta.getLugar(),
+                pdi_posta.getMomento(),
+                pdi_posta.getContenido(),
+                pdi_posta.getUrl_imagen(),
+                resultadosDto
+        );
     }
 
     private ResultadoAnalisisDTO resultadoAResultadoIndividualDTO(ResultadoAnalisis resultado){
