@@ -95,7 +95,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
         if (pdi.getUrl_imagen() == null || pdi.getUrl_imagen().isBlank()){
             logger_fachada.info("Pieza de informacion sin url, se procede a guardar sin procesar.");
-            //TODO agregar un for para todos los analizadores que diga que pdi no tiene imagen
+
             pdi.agregarResultado(new ResultadoAnalisis("SIN_IMAGEN", "PdI sin url."));
             pdi.setUrl_imagen("No posee.");
             PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
