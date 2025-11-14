@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
-@Component
+//@Component
 public class PdiQueueConsumer implements InitializingBean, DisposableBean {
 
     private static final Logger log = LoggerFactory.getLogger(PdiQueueConsumer.class);
