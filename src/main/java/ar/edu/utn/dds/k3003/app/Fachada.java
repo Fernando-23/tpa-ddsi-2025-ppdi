@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class Fachada implements FachadaProcesadorPdIPropia {
@@ -212,15 +213,16 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         );
     }
 
-    private PiezaDeInformacionDTO piezaDeInfoAdto(PiezaDeInformacion pdi_posta){
+    private PiezaDeInformacionDTO piezaDeInfoAdto(PiezaDeInformacion pdi_posta) {
 
-        List<ResultadoAnalisisDTO> resultadosDto = pdi_posta.getRes_analisis()
-                .stream()
-                .map(r -> new ResultadoAnalisisDTO(
-                        r.getTipo_analizador(),
-                        r.getResultado_procesamiento()
-                ))
-                .toList();
+        // Concatenar todos los resultados de los analizadores en un solo string
+        String resultadosConcatenados = "";
+        if (pdi_posta.getRes_analisis() != null) {
+            resultadosConcatenados = pdi_posta.getRes_analisis().stream()
+                    .map(ResultadoAnalisis::getResultado_procesamiento)
+                    .filter(r -> r != null && !r.isBlank())
+                    .collect(Collectors.joining(" ")); // ej: "[lindo, viejo,texto] texto_ocr ..."
+        }
 
         return new PiezaDeInformacionDTO(
                 pdi_posta.getId(),
@@ -230,7 +232,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
                 pdi_posta.getMomento(),
                 pdi_posta.getContenido(),
                 pdi_posta.getUrl_imagen(),
-                resultadosDto
+                resultadosConcatenados
         );
     }
 
