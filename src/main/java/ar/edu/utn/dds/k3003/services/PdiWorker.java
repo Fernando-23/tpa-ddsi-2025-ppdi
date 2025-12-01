@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.services;
 
 
 import ar.edu.utn.dds.k3003.app.Fachada;
+import ar.edu.utn.dds.k3003.clients.FuenteClient;
 import ar.edu.utn.dds.k3003.clients.fuente.FuentesProcesadorProxy;
 import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
 import org.slf4j.Logger;
@@ -15,11 +16,11 @@ public class PdiWorker {
     private static final Logger log = LoggerFactory.getLogger(PdiWorker.class);
 
     private final Fachada fachada;
-    private final FuentesProcesadorProxy fuentesProxy;
+    private final FuenteClient fuente_client;
 
-    public PdiWorker(Fachada fachada, FuentesProcesadorProxy fuentesProxy) {
+    public PdiWorker(Fachada fachada, FuenteClient fuente_client) {
         this.fachada = fachada;
-        this.fuentesProxy = fuentesProxy;
+        this.fuente_client = fuente_client;
     }
 
     @RabbitListener(queues = "pdis_queue")
@@ -31,7 +32,7 @@ public class PdiWorker {
             PiezaDeInformacionDTO procesada = fachada.procesar(pdi);
             log.info("[WORKER] PDI procesada en PPDI con id={}", procesada.id());
 
-            PiezaDeInformacionDTO enFuente = fuentesProxy.notificarFinProcesamiento(procesada);
+            PiezaDeInformacionDTO enFuente = fuente_client.notificarFinProcesamiento(procesada);
             log.info("[WORKER] Fuente confirmó PDI id={} para hecho={}",
                     enFuente.id(), enFuente.hechoId());
 
