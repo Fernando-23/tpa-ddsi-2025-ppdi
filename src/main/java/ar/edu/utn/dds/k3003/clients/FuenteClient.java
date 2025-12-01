@@ -17,7 +17,7 @@ public class FuenteClient {
                         @Value("${fuente.url:http://localhost:8081}") String baseUrl) {
         this.restTemplate = builder.build();
         this.baseUrl = baseUrl;
-        this.isMock = "http://localhost:8081".equals(baseUrl);
+        this.isMock = false;//"http://localhost:8081".equals(baseUrl);
 
         System.out.println("Fuente URL: " + baseUrl);
         System.out.println("Modo Mock: " + isMock);

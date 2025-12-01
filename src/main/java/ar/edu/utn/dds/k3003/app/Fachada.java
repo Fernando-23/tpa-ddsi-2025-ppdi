@@ -215,13 +215,10 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
     private PiezaDeInformacionDTO piezaDeInfoAdto(PiezaDeInformacion pdi_posta) {
 
-        // Concatenar todos los resultados de los analizadores en un solo string
-        String resultadosConcatenados = "";
-        if (pdi_posta.getRes_analisis() != null) {
-            resultadosConcatenados = pdi_posta.getRes_analisis().stream()
-                    .map(ResultadoAnalisis::getResultado_procesamiento)
-                    .filter(r -> r != null && !r.isBlank())
-                    .collect(Collectors.joining(" ")); // ej: "[lindo, viejo,texto] texto_ocr ..."
+        // Mapear cada ResultadoAnalisis de la entidad a ResultadoAnalisisDTO
+        List<ResultadoAnalisisDTO> resultadosDTO = List.of();
+        if (pdi_posta.getRes_analisis() != null && !pdi_posta.getRes_analisis().isEmpty()) {
+            resultadosDTO = this.resultadosPostaAResultadosDTO(pdi_posta.getRes_analisis());
         }
 
         return new PiezaDeInformacionDTO(
@@ -232,7 +229,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
                 pdi_posta.getMomento(),
                 pdi_posta.getContenido(),
                 pdi_posta.getUrl_imagen(),
-                resultadosConcatenados
+                resultadosDTO
         );
     }
 
