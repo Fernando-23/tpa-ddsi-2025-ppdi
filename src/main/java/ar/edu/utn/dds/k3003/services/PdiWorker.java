@@ -3,7 +3,6 @@ package ar.edu.utn.dds.k3003.services;
 
 import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.clients.FuenteClient;
-import ar.edu.utn.dds.k3003.clients.fuente.FuentesProcesadorProxy;
 import ar.edu.utn.dds.k3003.dtos.PiezaDeInformacionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
