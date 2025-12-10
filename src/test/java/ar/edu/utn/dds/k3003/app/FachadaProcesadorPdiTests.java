@@ -44,7 +44,7 @@ public class FachadaProcesadorPdiTests {
     }
 
     @Test
-    void testProcesar_ok() {
+    void testProcesar_ok() throws InterruptedException {
         when(solicitudesClient.estaActivo("hechoId")).thenReturn(true);
 
         var input = new PiezaDeInformacionDTO(1, "hechoId", "descripcion",

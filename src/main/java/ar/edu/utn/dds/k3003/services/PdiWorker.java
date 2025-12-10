@@ -45,7 +45,7 @@ public class PdiWorker {
             return;
         }
         
-        log.info("[WORKER] ✅ ACTIVANDO worker - RabbitMQ puede enviar mensajes");
+        log.info("[WORKER] ACTIVANDO worker - RabbitMQ puede enviar mensajes");
         log.info("[WORKER] Containers totales: {}", registry.getListenerContainers().size());
         
         // Buscar el container específico por ID
@@ -98,7 +98,7 @@ public class PdiWorker {
         autoStartup = "false",
         containerFactory = "rabbitListenerContainerFactory"
     )
-    public void consumirPdi(PiezaDeInformacionDTO pdi) {
+    public void consumirPdi(PiezaDeInformacionDTO pdi) throws InterruptedException {
         log.info("[WORKER] Recibí PDI desde cola: {}", pdi);
         
         try {

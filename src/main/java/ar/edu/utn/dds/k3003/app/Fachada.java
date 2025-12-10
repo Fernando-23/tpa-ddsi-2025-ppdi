@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +44,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
     @Transactional
     @Override
-    public PiezaDeInformacionDTO procesar(PiezaDeInformacionDTO pdiDto) throws IllegalStateException {
+    public PiezaDeInformacionDTO procesar(PiezaDeInformacionDTO pdiDto) throws IllegalStateException, InterruptedException {
         logger_fachada.info("Procesando PDI: " + pdiDto);
 
         /////////////////////////////////////////chequeos
@@ -63,7 +64,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
             logger_fachada.error("El hecho {} no esta activo", pdiDto.hechoId());
             throw new IllegalStateException("El hecho no esta activo");
         }
-
+        logger_fachada.info("Hecho sin solicitudes aceptadas, se procesa el pdi");
         ///////////////////////////////////////// procesamiento en si del pdi
         PiezaDeInformacion pdi_mapeado = dtoAPiezaDeInfo(pdiDto);
          
@@ -99,12 +100,14 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
             pdi.agregarResultado(new ResultadoAnalisis("SIN_IMAGEN", "PdI sin url."));
             pdi.setUrl_imagen("No posee.");
+            TimeUnit.SECONDS.sleep(3);
             PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
             logger_fachada.info("Pieza de informacion {} procesado",pdi_guardado.getId());
             return this.piezaDeInfoAdto(pdi_guardado);
         }
 
         gestor_analisis.realizarAnalisis(pdi);
+        TimeUnit.SECONDS.sleep(3);
         logger_fachada.info("Analisis de imagen hecho.");
 
         PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);

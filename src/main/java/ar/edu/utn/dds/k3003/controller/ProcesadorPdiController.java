@@ -54,7 +54,7 @@ public class ProcesadorPdiController {
     }
 
     @PostMapping
-    public ResponseEntity<PiezaDeInformacionDTO> procesarPdi(@RequestBody(required = false) PiezaDeInformacionDTO pdi) {
+    public ResponseEntity<PiezaDeInformacionDTO> procesarPdi(@RequestBody(required = false) PiezaDeInformacionDTO pdi) throws InterruptedException {
         if (pdi == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no puede ser nulo");
         }
