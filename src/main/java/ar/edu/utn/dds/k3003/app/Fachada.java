@@ -12,6 +12,7 @@ import ar.edu.utn.dds.k3003.repository.PdiRepository;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -54,6 +55,13 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         this.pdi_procesado_existente_mt = Counter.builder("pdis.procesados.existentes")
                 .description("Numero de piezas de informacion procesados pero ya existian")
                 .register(registry);
+    }
+
+
+    public Fachada(PdiRepository pdiRepository,
+                   SolicitudesClient solicitudesClient,
+                   GestorAnalizadores gestor_analisis) {
+        this(pdiRepository, solicitudesClient, gestor_analisis, new SimpleMeterRegistry());
     }
 
     public Fachada() {
