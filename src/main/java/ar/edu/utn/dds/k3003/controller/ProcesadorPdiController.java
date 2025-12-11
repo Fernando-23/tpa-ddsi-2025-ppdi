@@ -20,15 +20,12 @@ import java.util.List;
 public class ProcesadorPdiController {
     private final Fachada fachadaProcesadorPdI;
 
-    private final Counter pdisProcesados;
+
     private final Counter pdisConsultados;
 
     @Autowired
     public ProcesadorPdiController(Fachada fachadaProcesadorPdI, MeterRegistry registry) {
         this.fachadaProcesadorPdI = fachadaProcesadorPdI;
-        this.pdisProcesados = Counter.builder("pdis.procesados")
-                .description("Numero de piezas de informacion procesados")
-                .register(registry);
 
         this.pdisConsultados = Counter.builder("pdis.consultadas")
                 .description("Numero de piezas de informacion consultadas")
@@ -58,7 +55,6 @@ public class ProcesadorPdiController {
         if (pdi == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no puede ser nulo");
         }
-        pdisProcesados.increment();
         var procesado = fachadaProcesadorPdI.procesar(pdi);
         /*boolean esNuevo = !StringUtils.hasText(pdi.id()); Esto podria crear un struct para si es nuevo o procesado
         var status = esNuevo ? HttpStatus.CREATED : HttpStatus.OK;*/

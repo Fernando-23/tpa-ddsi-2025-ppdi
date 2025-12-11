@@ -10,8 +10,12 @@ import ar.edu.utn.dds.k3003.model.PiezaDeInformacion;
 import ar.edu.utn.dds.k3003.model.ResultadoAnalisis;
 import ar.edu.utn.dds.k3003.repository.PdiRepository;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +33,55 @@ public class Fachada implements FachadaProcesadorPdIPropia {
     private SolicitudesClient solicitudesClient;
     private GestorAnalizadores gestor_analisis;
     private final static Logger logger_fachada = org.slf4j.LoggerFactory.getLogger(Fachada.class);
+    private final Counter hecho_no_activo;
+    private final Counter pdi_procesado_mt;
+    private final Counter pdi_procesado_existente_mt;
 
     @Autowired
-    public Fachada(PdiRepository pdiRepository, SolicitudesClient solicitudesClient,GestorAnalizadores gestor_analisis) {
+    public Fachada(PdiRepository pdiRepository, SolicitudesClient solicitudesClient, GestorAnalizadores gestor_analisis, MeterRegistry registry) {
         this.pdiRepository = pdiRepository;
         this.solicitudesClient = solicitudesClient;
         this.gestor_analisis = gestor_analisis;
+
+        this.hecho_no_activo = Counter.builder("busqueda.comun")
+                .description("Numero de piezas de informacion tratadas de procesar, pero fallidas por hecho censurado")
+                .register(registry);
+
+        this.pdi_procesado_mt = Counter.builder("pdis.procesados")
+                .description("Numero de piezas de informacion procesados")
+                .register(registry);
+
+        this.pdi_procesado_existente_mt = Counter.builder("pdis.procesados.existentes")
+                .description("Numero de piezas de informacion procesados pero ya existian")
+                .register(registry);
     }
 
     public Fachada() {
+        ConfigurableApplicationContext ctx =
+                new SpringApplicationBuilder(ar.edu.utn.dds.k3003.Application.class)
+                        .properties(
+                                "spring.main.web-application-type=none",
+                                "spring.jpa.hibernate.ddl-auto=create-drop",
+                                // pedido de tests
+                                "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+                        )
+                        .profiles("test")
+                        .run();
+
         this.pdiRepository = new ar.edu.utn.dds.k3003.repository.InMemoryPdiRepository();
+        MeterRegistry registry = ctx.getBean(MeterRegistry.class);
+        this.hecho_no_activo = Counter.builder("busqueda.comun")
+                .description("Numero de piezas de informacion tratadas de procesar, pero fallidas por hecho censurado")
+                .register(registry);
+
+        this.pdi_procesado_mt = Counter.builder("pdis.procesados")
+                .description("Numero de piezas de informacion procesados")
+                .register(registry);
+
+        this.pdi_procesado_existente_mt = Counter.builder("pdis.procesados.existentes")
+                .description("Numero de piezas de informacion procesados pero ya existian")
+                .register(registry);
+
     }
 
 
@@ -61,9 +104,11 @@ public class Fachada implements FachadaProcesadorPdIPropia {
             
 
         if(!solicitudesClient.estaActivo(pdiDto.hechoId())){
-            logger_fachada.error("El hecho {} no esta activo", pdiDto.hechoId());
+            logger_fachada.warn("El hecho {} no esta activo", pdiDto.hechoId());
+            hecho_no_activo.increment();
             throw new IllegalStateException("El hecho no esta activo");
         }
+
         logger_fachada.info("Hecho sin solicitudes aceptadas, se procesa el pdi");
         ///////////////////////////////////////// procesamiento en si del pdi
         PiezaDeInformacion pdi_mapeado = dtoAPiezaDeInfo(pdiDto);
@@ -84,14 +129,17 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         if(pdi_procesado.isPresent()){
             PiezaDeInformacion pdi_encontrado = pdi_procesado.get();
             logger_fachada.info("El PdI ya existe, se devuelve el existente con id: {}", pdi_encontrado.getId());
+            pdi_procesado_existente_mt.increment();
             return this.piezaDeInfoAdto(pdi_encontrado);
         }
 
+        /*
         //sino, proceso 
         if(!solicitudesClient.estaActivo(pdiDto.hechoId())){
             logger_fachada.warn("El hecho {} no esta activo",pdiDto.hechoId());
+
             throw new IllegalStateException("El hecho asociado al PdI no esta activo");
-        }
+        }*/
 
         PiezaDeInformacion pdi = this.dtoAPiezaDeInfo(pdiDto);
 
@@ -103,6 +151,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
             TimeUnit.SECONDS.sleep(3);
             PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
             logger_fachada.info("Pieza de informacion {} procesado",pdi_guardado.getId());
+
             return this.piezaDeInfoAdto(pdi_guardado);
         }
 
@@ -112,6 +161,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
 
         PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
         logger_fachada.info("Pieza de Informacion {} procesado",pdi_guardado.getId());
+        pdi_procesado_mt.increment();
         return this.piezaDeInfoAdto(pdi_guardado);
     }
 
