@@ -43,7 +43,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
         this.solicitudesClient = solicitudesClient;
         this.gestor_analisis = gestor_analisis;
 
-        this.hecho_no_activo = Counter.builder("busqueda.comun")
+        this.hecho_no_activo = Counter.builder("pdis.hecho.censurado")
                 .description("Numero de piezas de informacion tratadas de procesar, pero fallidas por hecho censurado")
                 .register(registry);
 
