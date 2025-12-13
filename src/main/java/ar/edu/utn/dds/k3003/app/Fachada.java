@@ -159,7 +159,7 @@ public class Fachada implements FachadaProcesadorPdIPropia {
             TimeUnit.SECONDS.sleep(3);
             PiezaDeInformacion pdi_guardado = pdiRepository.save(pdi);
             logger_fachada.info("Pieza de informacion {} procesado",pdi_guardado.getId());
-
+            pdi_procesado_mt.increment();
             return this.piezaDeInfoAdto(pdi_guardado);
         }
 
