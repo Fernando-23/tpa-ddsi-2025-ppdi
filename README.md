@@ -100,6 +100,7 @@ Agregar un analizador nuevo solo requiere implementar la interfaz `Analizador`: 
 | `FUENTE_URL` | URL del servicio de Fuentes |
 | `SOLICITUDES_SERVICE_URL` | URL del servicio de Solicitudes |
 | `DD_API_KEY`, `DD_APP_KEY` | Credenciales de Datadog (opcional) |
+| `DD_METRICS_ENABLED` | `true` para exportar métricas a Datadog (por defecto `false`) |
 
 ### Local (base H2 en memoria)
 
